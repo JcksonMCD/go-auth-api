@@ -1,12 +1,16 @@
 package controllers
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"github.com/JcksonMCD/golang-jwt/database"
+	"github.com/JcksonMCD/golang-jwt/models"
 	helper "github.com/JcksonMCD/golang-jwt/service"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -42,5 +46,15 @@ func GetUserById() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var user models.User
+		err = UserCollection.FindOne(ctx, bson.M{"user_id": userId}).Decode(&user)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, user)
 	}
 }
