@@ -71,6 +71,10 @@ func Signup() gin.HandlerFunc {
 			return
 		}
 
+		// time fields set to now using time package
+		user.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+
 		// saving logic to go here....
 
 		c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
