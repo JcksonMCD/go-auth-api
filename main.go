@@ -1,7 +1,10 @@
 package main
 
 import (
+	"log"
+
 	routes "github.com/JcksonMCD/golang-jwt/routes"
+	"github.com/joho/godotenv"
 
 	"os"
 
@@ -9,10 +12,15 @@ import (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
 	port := os.Getenv("PORT")
 
 	if port == "" {
-		port = "8000"
+		port = "8080"
 	}
 
 	router := gin.New()
