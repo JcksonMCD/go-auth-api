@@ -29,7 +29,15 @@ func GenerateAllTokens(email string, firstName string, lastName string, userType
 		Uid:        uid,
 		User_Type:  userType,
 		StandardClaims: jwt.StandardClaims{
+			// Expires after 24 hours
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),
+		},
+	}
+
+	refrechClaims := &SignedDetails{
+		StandardClaims: jwt.StandardClaims{
+			// Extended expiration
+			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(168)).Unix(),
 		},
 	}
 }
