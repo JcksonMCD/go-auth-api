@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"os"
 	"time"
 
@@ -43,5 +44,10 @@ func GenerateAllTokens(email string, firstName string, lastName string, userType
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
 	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
+
+	if err != nil {
+		log.Panic(err)
+		return
+	}
 
 }
