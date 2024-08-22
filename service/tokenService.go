@@ -42,6 +42,7 @@ func GenerateAllTokens(email string, firstName string, lastName string, userType
 		},
 	}
 
+	// Tokens encoded
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
 	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
 
@@ -51,4 +52,8 @@ func GenerateAllTokens(email string, firstName string, lastName string, userType
 	}
 
 	return token, refreshToken, err
+}
+
+func UpdateAllTokens() {
+
 }
