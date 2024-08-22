@@ -34,10 +34,14 @@ func GenerateAllTokens(email string, firstName string, lastName string, userType
 		},
 	}
 
-	refrechClaims := &SignedDetails{
+	refreshClaims := &SignedDetails{
 		StandardClaims: jwt.StandardClaims{
 			// Extended expiration
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(168)).Unix(),
 		},
 	}
+
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
+	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
+
 }
