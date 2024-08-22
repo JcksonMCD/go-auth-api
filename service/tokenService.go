@@ -50,4 +50,5 @@ func GenerateAllTokens(email string, firstName string, lastName string, userType
 		return
 	}
 
+	return token, refreshToken, err
 }
