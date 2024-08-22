@@ -140,7 +140,7 @@ func Login() gin.HandlerFunc {
 		}
 
 		// check if passwords match
-		passwordIsValid, msg := VerifyPassword(*user.Password, *&foundUser.Password)
+		passwordIsValid, msg := VerifyPassword(*user.Password, *foundUser.Password)
 		defer cancel()
 		if !passwordIsValid {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
