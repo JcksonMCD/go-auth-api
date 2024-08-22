@@ -22,8 +22,14 @@ import (
 var UserCollection *mongo.Collection = database.OpenCollection(database.Client, "user")
 var validate = validator.New()
 
-func HashPassword() {
+func HashPassword(password string) string {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return string(bytes)
 }
 
 func VerifyPassword(userPassword string, providedPassword string) (bool, string) {
@@ -73,6 +79,7 @@ func Signup() gin.HandlerFunc {
 
 		// set password as hashed password
 		password := HashPassword(*user.Password)
+		user.Password = &password
 
 		// Check if the phone number already exists in the database.
 		count, err = UserCollection.CountDocuments(ctx, bson.M{"phone": user.Phone})
