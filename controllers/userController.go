@@ -141,6 +141,18 @@ func Login() gin.HandlerFunc {
 		// check if passwords match
 		passwordIsValid, msg := VerifyPassword(*user.Password, *&foundUser.Password)
 		defer cancel()
+		if !passwordIsValid {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+			return
+		}
+
+		if foundUser.Email == nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+			return
+		}
+
+		token, refreshToken, _ := service.GenerateAllTokens(*foundUser.Email, *foundUser.FirstName, *foundUser.LastName, *foundUser.UserType, *&foundUser.UserID)
+		service.UpdateAllTokens(token, refreshToken, foundUser.UserID)
 	}
 }
 
