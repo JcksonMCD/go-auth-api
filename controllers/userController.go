@@ -16,6 +16,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var UserCollection *mongo.Collection = database.OpenCollection(database.Client, "user")
@@ -25,8 +26,17 @@ func HashPassword() {
 
 }
 
-func VerifyPassword() {
+func VerifyPassword(userPassword string, providedPassword string) (bool, string) {
+	err := bcrypt.CompareHashAndPassword([]byte(providedPassword), []byte(userPassword))
+	check := true
+	msg := ""
 
+	if err != nil {
+		check = false
+		msg = fmt.Sprintf("password incorrect")
+	}
+
+	return check, msg
 }
 
 // Signup returns a handler function that registers a new user.
