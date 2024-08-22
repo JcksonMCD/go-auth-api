@@ -71,6 +71,9 @@ func Signup() gin.HandlerFunc {
 			return
 		}
 
+		// set password as hashed password
+		password := HashPassword(*user.Password)
+
 		// Check if the phone number already exists in the database.
 		count, err = UserCollection.CountDocuments(ctx, bson.M{"phone": user.Phone})
 		if err != nil {
