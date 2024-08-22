@@ -2,12 +2,14 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/JcksonMCD/golang-jwt/database"
 	"github.com/JcksonMCD/golang-jwt/models"
+	"github.com/JcksonMCD/golang-jwt/service"
 	helper "github.com/JcksonMCD/golang-jwt/service"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -78,10 +80,22 @@ func Signup() gin.HandlerFunc {
 		// set id
 		user.ID = primitive.NewObjectID()
 		user.UserID = user.ID.Hex()
+		// token handling
+		token, refreshToken, _ := service.GenerateAllTokens(*user.Email, *user.FirstName, *user.LastName, *user.UserType, *&user.UserID)
+		user.Token = &token
+		user.RefreshToken = &refreshToken
 
-		// saving logic to go here....
+		//insertion to db logic
+		resultInsertionNumber, insertErr := UserCollection.InsertOne(ctx, user)
+		if insertErr != nil {
+			// error handling
+			msg := fmt.Sprintf("User item was not created")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+			return
+		}
+		defer cancel()
 
-		c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
+		c.JSON(http.StatusOK, gin.H{"message": resultInsertionNumber})
 	}
 }
 
