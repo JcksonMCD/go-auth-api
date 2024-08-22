@@ -77,6 +77,7 @@ func Signup() gin.HandlerFunc {
 		user.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		// set id
 		user.ID = primitive.NewObjectID()
+		user.UserID = user.ID.Hex()
 
 		// saving logic to go here....
 
