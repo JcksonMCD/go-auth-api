@@ -60,15 +60,15 @@ func Signup() gin.HandlerFunc {
 		}
 
 		// Validate the user data.
-		if err := validate.Struct(user); err != nil {
+		if err := validate.Struct(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
 		// Check if the email already exists in the database.
-		count, err := UserCollection.CountDocuments(ctx, bson.M{"email": user.Email})
+		count, err := UserCollection.CountDocuments(ctx, bson.M{"email": *user.Email})
 		if err != nil {
-			log.Println("Error occurred while checking email:", err)
+			log.Printf("Error occurred while checking email: %v", err) // Detailed logging
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error occurred while checking email."})
 			return
 		}
@@ -126,7 +126,7 @@ func Login() gin.HandlerFunc {
 		var user models.User
 		var foundUser models.User
 
-		if err := c.BindJSON(user); err != nil {
+		if err := c.BindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
@@ -239,7 +239,9 @@ func GetUsers() gin.HandlerFunc {
 func GetUserById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId := c.Param("user_id")
+		log.Printf("Querying user with ID: %s", userId)
 
+		// Match user type (authorization check)
 		err := helper.MatchUserTypeToID(c, userId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -247,13 +249,30 @@ func GetUserById() gin.HandlerFunc {
 		}
 
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
-		var user models.User
-		err = UserCollection.FindOne(ctx, bson.M{"user_id": userId}).Decode(&user)
 		defer cancel()
+
+		var user models.User
+
+		// Correct filter to use user_id field
+		filter := bson.M{"user_id": userId}
+		log.Printf("Query filter: %v", filter)
+
+		err = UserCollection.FindOne(ctx, filter).Decode(&user)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			if err == mongo.ErrNoDocuments {
+				log.Printf("No document found for user ID: %s", userId)
+				c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			} else {
+				log.Printf("Error fetching user: %v", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "An error occurred while fetching user"})
+			}
 			return
 		}
+
+		// Debug: Check the found user data
+		log.Printf("Found user: %+v", user)
+
+		// Return user data in JSON format
 		c.JSON(http.StatusOK, user)
 	}
 }
